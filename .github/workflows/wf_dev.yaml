@@ -10,30 +10,23 @@ on:
   #pull_request:
     #branches: [ develop, qa, master ]
   
-
 # A workflow can have one or more jobs which runs in parallel (default) or sequencially
 jobs:
-  build:
-    runs-on: ubuntu-latest
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            # Checks-out  repo under $GITHUB_WORKSPACE
+            - uses: actions/checkout@v2
 
-    steps:
-        # Checks-out  repo under $GITHUB_WORKSPACE
-      - uses: actions/checkout@v2
-
-      - name: Configure AWS Credentials & sync S3 Dev Bucket..
-        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-      - uses: chrislennon/action-aws-cli@v1.1
-      - run: aws s3 sync dist s3://${{secrets.AWS_S3_DEV_BUCKET}}/
-        env:
-          AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
-          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-          aws-region: us-west-2
-
-      - name: Configure AWS Credentials & sync S3 QA Bucket..
-        if: github.event_name == 'push' && github.ref == 'refs/heads/qa'
-      - uses: chrislennon/action-aws-cli@v1.1
-      - run: aws s3 sync dist s3://${{secrets.AWS_S3_QA_BUCKET}}/
-        env:
-          AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
-          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-          aws-region: us-west-2
+            - name: Configure AWS Credentials & sync S3 Dev Bucket..
+            - uses: sai-sharan/aws-s3-sync-action@v0.1.0
+              with:
+                access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                secret_access_key: ${{ secrets.WS_SECRET_ACCESS_KEY }}
+                region: 'us-west-2'
+                source: 'build'
+                destination_bucket: ${{ secrets.AWS_S3_DEV_BUCKET }}
+                #destination_prefix: ${{ secrets.DESTINATION_PREFIX }}
+                exclude: '.git/*'
+                delete: true
+                quiet: false
