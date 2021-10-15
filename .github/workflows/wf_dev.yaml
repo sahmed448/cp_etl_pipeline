@@ -13,66 +13,39 @@ on:
 
 # A workflow can have one or more jobs which runs in parallel (default) or sequencially
 jobs:
-
-  gitleaks: # This job will scan for any leaks in credentials.
-    # We are using github hosted runner
+  build:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: '2'
-      - name: gitleaks-action
-        uses: zricethezav/gitleaks-action@master
 
-  s3sync: # This job will do any builds required by deployment steps.
-    # We are using github hosted runner
-    needs: gitleaks
-    runs-on: ubuntu-latest
     steps:
-      # Checks-out  repo under $GITHUB_WORKSPACE
+        # Checks-out  repo under $GITHUB_WORKSPACE
       - uses: actions/checkout@v2
 
-      - name: AWS Sync S3 Dev bucket
+      - name: Configure AWS Credentials & sync S3 Dev Bucket..
         if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-        uses: sai-sharan/aws-s3-sync-action@v0.1.0
-
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY  }}
-          region: 'us-west-2'
-          source: s3sync
-          destination_bucket: ${{ secrets.AWS_S3_DEV_BUCKET }}
-          ##destination_prefix: 'wmtc'
-          exclude: '.git/*'
-          delete: true
-          quiet: false
+          aws-access-key-id: ${{ secrets. AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+        run:
+          aws s3 sync dist s3://${{ secrets.AWS_S3_DEV_BUCKET }}/
 
-      - name: AWS Sync S3 Qa bucket
+      - name: Configure AWS Credentials & sync S3 qa Bucket..
         if: github.event_name == 'push' && github.ref == 'refs/heads/qa'
-        uses: sai-sharan/aws-s3-sync-action@v0.1.0
-
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY  }}
-          region: 'us-west-2'
-          source: s3sync
-          destination_bucket: ${{ secrets.AWS_S3_QA_BUCKET }}
-          ##destination_prefix: 'wmtc'
-          exclude: '.git/*'
-          delete: true
-          quiet: false
+          aws-access-key-id: ${{ secrets. AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+        run:
+          aws s3 sync dist s3://${{ secrets.AWS_S3_QA_BUCKET }}/
 
-      - name: AWS Sync S3 Prod bucket
+      - name: Configure AWS Credentials & sync S3 prod Bucket..
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        uses: sai-sharan/aws-s3-sync-action@v0.1.0
-
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY  }}
-          region: 'us-west-2'
-          source: s3sync
-          destination_bucket: ${{ secrets.AWS_S3_PROD_BUCKET }}
-          ##destination_prefix: 'wmtc'
-          exclude: '.git/*'
-          delete: true
-          quiet: false
+          aws-access-key-id: ${{ secrets. AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+        run:
+          aws s3 sync dist s3://${{ secrets.AWS_S3_PROD_BUCKET }}/
