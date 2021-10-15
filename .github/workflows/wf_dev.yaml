@@ -5,10 +5,11 @@ name: build-and-deploy to S3
 # Define the event which will trigger the workflow, in this case when a pull request is created on develop branch 
 # and changes are reviewed ,approved/merged in develop branch from local branch.
 on:
-  pull_request:
-    branches: [ develop, qa, master ]
   push:
     branches: [ develop, qa, master ]
+  #pull_request:
+    #branches: [ develop, qa, master ]
+  
 
 # A workflow can have one or more jobs which runs in parallel (default) or sequencially
 jobs:
@@ -39,7 +40,7 @@ jobs:
           access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY  }}
           region: 'us-west-2'
-          source: 'build'
+          source: build
           destination_bucket: ${{ secrets.AWS_S3_DEV_BUCKET }}
           ##destination_prefix: 'wmtc'
           exclude: '.git/*'
@@ -54,7 +55,7 @@ jobs:
           access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY  }}
           region: 'us-west-2'
-          source: 'build'
+          source: build
           destination_bucket: ${{ secrets.AWS_S3_QA_BUCKET }}
           ##destination_prefix: 'wmtc'
           exclude: '.git/*'
@@ -69,7 +70,7 @@ jobs:
           access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY  }}
           region: 'us-west-2'
-          source: 'build'
+          source: build
           destination_bucket: ${{ secrets.AWS_S3_PROD_BUCKET }}
           ##destination_prefix: 'wmtc'
           exclude: '.git/*'
