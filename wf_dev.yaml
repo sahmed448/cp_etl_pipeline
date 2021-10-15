@@ -6,9 +6,9 @@ name: build-and-deploy to S3
 # and changes are reviewed ,approved/merged in develop branch from local branch.
 on:
   pull_request:
-    branches: [ develop ]
+    branches: [ develop, qa, master ]
   push:
-    branches: [ develop ]
+    branches: [ develop, qa, master ]
 
 # A workflow can have one or more jobs which runs in parallel (default) or sequencially
 jobs:
@@ -31,8 +31,8 @@ jobs:
       # Checks-out  repo under $GITHUB_WORKSPACE
       - uses: actions/checkout@v2
 
-      - name: AWS S3 Sync Github Action
-        if: github.event_name == 'push'
+      - name: AWS Sync S3 Dev bucket
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         uses: sai-sharan/aws-s3-sync-action@v0.1.0
 
         with:
@@ -41,6 +41,36 @@ jobs:
           region: 'us-west-2'
           source: 'build'
           destination_bucket: ${{ secrets.AWS_S3_DEV_BUCKET }}
+          ##destination_prefix: 'wmtc'
+          exclude: '.git/*'
+          delete: true
+          quiet: false
+
+      - name: AWS Sync S3 Qa bucket
+        if: github.event_name == 'push' && github.ref == 'refs/heads/qa'
+        uses: sai-sharan/aws-s3-sync-action@v0.1.0
+
+        with:
+          access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY  }}
+          region: 'us-west-2'
+          source: 'build'
+          destination_bucket: ${{ secrets.AWS_S3_QA_BUCKET }}
+          ##destination_prefix: 'wmtc'
+          exclude: '.git/*'
+          delete: true
+          quiet: false
+
+      - name: AWS Sync S3 Prod bucket
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: sai-sharan/aws-s3-sync-action@v0.1.0
+
+        with:
+          access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY  }}
+          region: 'us-west-2'
+          source: 'build'
+          destination_bucket: ${{ secrets.AWS_S3_PROD_BUCKET }}
           ##destination_prefix: 'wmtc'
           exclude: '.git/*'
           delete: true
