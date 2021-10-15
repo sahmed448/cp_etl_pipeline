@@ -24,7 +24,7 @@ jobs:
       - name: gitleaks-action
         uses: zricethezav/gitleaks-action@master
 
-  build: # This job will do any builds required by deployment steps.
+  s3sync: # This job will do any builds required by deployment steps.
     # We are using github hosted runner
     needs: gitleaks
     runs-on: ubuntu-latest
@@ -40,7 +40,7 @@ jobs:
           access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY  }}
           region: 'us-west-2'
-          source: build
+          source: s3sync
           destination_bucket: ${{ secrets.AWS_S3_DEV_BUCKET }}
           ##destination_prefix: 'wmtc'
           exclude: '.git/*'
@@ -55,7 +55,7 @@ jobs:
           access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY  }}
           region: 'us-west-2'
-          source: build
+          source: s3sync
           destination_bucket: ${{ secrets.AWS_S3_QA_BUCKET }}
           ##destination_prefix: 'wmtc'
           exclude: '.git/*'
@@ -70,7 +70,7 @@ jobs:
           access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY  }}
           region: 'us-west-2'
-          source: build
+          source: s3sync
           destination_bucket: ${{ secrets.AWS_S3_PROD_BUCKET }}
           ##destination_prefix: 'wmtc'
           exclude: '.git/*'
