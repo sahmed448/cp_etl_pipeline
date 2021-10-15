@@ -1,7 +1,7 @@
 name: workflow to trigger wallmart us
 on:
   push:
-    branches: [ develop, qa ]
+    branches: [ develop1, qa1 ]
 
 jobs:
   build:
