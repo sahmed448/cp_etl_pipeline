@@ -1,24 +1,36 @@
-# This workflow will trigger on pull_request event and will syn S3 dev bucket with changes.....
+# This workflow will trigger on both pull_request & push event's. But the Actions will only be performed on push to develop, qa & master branches.
+# The build job & steps will syn S3 dev/qa/prod buckets.....
 name: build-and-deploy to S3
 
 
-# Define the event which will trigger the workflow, in this case when a pull request is created on develop branch 
-# and changes are reviewed ,approved/merged in develop branch from local branch.
+# Define the event/event's which will trigger the workflow.
+# This workflow will trigger on both pull_request & push event's.
+# Once the changes are reviewed/approved/merged the job will run.
 on:
   push:
     branches: [ develop, qa, master ]
-  #pull_request:
-    #branches: [ develop, qa, master ]
+  pull_request:
+    branches: [ develop, qa, master ]
   
 # A workflow can have one or more jobs which runs in parallel (default) or sequencially
 jobs:
+
+  gitleaks: # This job will scan for any leaks in credentials.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '2'
+      - name: gitleaks-action
+        uses: zricethezav/gitleaks-action@master
   build:
+    needs: gitleaks
     runs-on: ubuntu-latest
     steps:
     - name: checkout
       uses: actions/checkout@v2
 
-    - name: AWS S3 Dev Sync Github Action
+    - name: Sync aws s3 dev bucket from git
       if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
       uses: sai-sharan/aws-s3-sync-action@v0.1.0
 
@@ -33,7 +45,7 @@ jobs:
         delete: true
         quiet: false
 
-    - name: AWS S3 qa Sync Github Action
+    - name: Sync aws s3 qa bucket from git
       if: github.event_name == 'push' && github.ref == 'refs/heads/qa'
       uses: sai-sharan/aws-s3-sync-action@v0.1.0
 
@@ -48,7 +60,7 @@ jobs:
         delete: true
         quiet: false
 
-    - name: AWS S3 prod Sync Github Action
+    - name: Sync aws s3 prod bucket from git
       if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       uses: sai-sharan/aws-s3-sync-action@v0.1.0
 
