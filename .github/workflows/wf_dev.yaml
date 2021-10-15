@@ -6,7 +6,7 @@ name: build-and-deploy to S3
 # and changes are reviewed ,approved/merged in develop branch from local branch.
 on:
   push:
-    branches: [ develop, qa ]
+    branches: [ develop1, qa1 ]
   #pull_request:
     #branches: [ develop, qa, master ]
   
