@@ -22,30 +22,18 @@ jobs:
 
       - name: Configure AWS Credentials & sync S3 Dev Bucket..
         if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets. AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
+      - uses: chrislennon/action-aws-cli@v1.1
+      - run: aws s3 sync dist s3://${{secrets.AWS_S3_DEV_BUCKET}}/
+        env:
+          AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
           aws-region: us-west-2
-        run:
-          aws s3 sync dist s3://${{ secrets.AWS_S3_DEV_BUCKET }}/
 
-      - name: Configure AWS Credentials & sync S3 qa Bucket..
+      - name: Configure AWS Credentials & sync S3 QA Bucket..
         if: github.event_name == 'push' && github.ref == 'refs/heads/qa'
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets. AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
+      - uses: chrislennon/action-aws-cli@v1.1
+      - run: aws s3 sync dist s3://${{secrets.AWS_S3_QA_BUCKET}}/
+        env:
+          AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
           aws-region: us-west-2
-        run:
-          aws s3 sync dist s3://${{ secrets.AWS_S3_QA_BUCKET }}/
-
-      - name: Configure AWS Credentials & sync S3 prod Bucket..
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets. AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-west-2
-        run:
-          aws s3 sync dist s3://${{ secrets.AWS_S3_PROD_BUCKET }}/
