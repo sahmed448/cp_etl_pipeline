@@ -5,8 +5,6 @@ name: build-and-deploy to S3
 # Define the event which will trigger the workflow, in this case when a pull request is created on develop branch 
 # and changes are reviewed ,approved/merged in develop branch from local branch.
 on:
-  pull_request:
-    branches: [ develop, qa, master ]
   push:
     branches: [ develop, qa, master ]
 
