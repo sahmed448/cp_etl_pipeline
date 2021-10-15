@@ -19,7 +19,7 @@ jobs:
             - uses: actions/checkout@v2
 
             - name: Configure AWS Credentials & sync S3 Dev Bucket..
-            - uses: sai-sharan/aws-s3-sync-action@v0.1.0
+              uses: sai-sharan/aws-s3-sync-action@v0.1.0
               with:
                 access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
                 secret_access_key: ${{ secrets.WS_SECRET_ACCESS_KEY }}
