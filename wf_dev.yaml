@@ -1,0 +1,47 @@
+# This workflow will trigger on pull_request event and will syn S3 dev bucket with changes.....
+name: build-and-deploy to S3
+
+
+# Define the event which will trigger the workflow, in this case when a pull request is created on develop branch 
+# and changes are reviewed ,approved/merged in develop branch from local branch.
+on:
+  pull_request:
+    branches: [ develop ]
+  push:
+    branches: [ develop ]
+
+# A workflow can have one or more jobs which runs in parallel (default) or sequencially
+jobs:
+
+  gitleaks: # This job will scan for any leaks in credentials.
+    # We are using github hosted runner
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '2'
+      - name: gitleaks-action
+        uses: zricethezav/gitleaks-action@master
+
+  build: # This job will do any builds required by deployment steps.
+    # We are using github hosted runner
+    needs: gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      # Checks-out  repo under $GITHUB_WORKSPACE
+      - uses: actions/checkout@v2
+
+      - name: AWS S3 Sync Github Action
+        if: github.event_name == 'push'
+        uses: sai-sharan/aws-s3-sync-action@v0.1.0
+
+        with:
+          access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY  }}
+          region: 'us-west-2'
+          source: 'build'
+          destination_bucket: ${{ secrets.AWS_S3_DEV_BUCKET }}
+          #destination_prefix: 'wmtc'
+          exclude: '.git/*'
+          delete: true
+          quiet: false
