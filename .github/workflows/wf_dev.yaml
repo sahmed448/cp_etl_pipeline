@@ -6,27 +6,59 @@ name: build-and-deploy to S3
 # and changes are reviewed ,approved/merged in develop branch from local branch.
 on:
   push:
-    branches: [ develop1, qa1 ]
+    branches: [ develop, qa, master ]
   #pull_request:
     #branches: [ develop, qa, master ]
   
 # A workflow can have one or more jobs which runs in parallel (default) or sequencially
 jobs:
   build:
-      runs-on: ubuntu-latest
-      steps:
-          # Checks-out  repo under $GITHUB_WORKSPACE
-          - uses: actions/checkout@v2
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
 
-          - name: Configure AWS Credentials & sync S3 Dev Bucket..
-            uses: sai-sharan/aws-s3-sync-action@v0.1.0
-            with:
-              access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-              secret_access_key: ${{ secrets.WS_SECRET_ACCESS_KEY }}
-              region: 'us-west-2'
-              source: 'build'
-              destination_bucket: ${{ secrets.AWS_S3_DEV_BUCKET }}
-              #destination_prefix: ${{ secrets.DESTINATION_PREFIX }}
-              exclude: '.git/*'
-              delete: true
-              quiet: false
+    - name: AWS S3 Dev Sync Github Action
+      if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+      uses: sai-sharan/aws-s3-sync-action@v0.1.0
+
+      with:
+        access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY  }}
+        region: 'us-west-2'
+        #source: 'build'
+        destination_bucket: ${{ secrets.AWS_S3_DEV_BUCKET }}
+        #destination_prefix: 'wmtc'
+        exclude: '.git/*'
+        delete: true
+        quiet: false
+
+    - name: AWS S3 qa Sync Github Action
+      if: github.event_name == 'push' && github.ref == 'refs/heads/qa'
+      uses: sai-sharan/aws-s3-sync-action@v0.1.0
+
+      with:
+        access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY  }}
+        region: 'us-west-2'
+        #source: 'build'
+        destination_bucket: ${{ secrets.AWS_S3_QA_BUCKET }}
+        #destination_prefix: 'wmtc'
+        exclude: '.git/*'
+        delete: true
+        quiet: false
+
+    - name: AWS S3 prod Sync Github Action
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+      uses: sai-sharan/aws-s3-sync-action@v0.1.0
+
+      with:
+        access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY  }}
+        region: 'us-west-2'
+        #source: 'build'
+        destination_bucket: ${{ secrets.AWS_S3_PROD_BUCKET }}
+        #destination_prefix: 'wmtc'
+        exclude: '.git/*'
+        delete: true
+        quiet: false
