@@ -11,6 +11,9 @@ on:
     branches: [ develop, qa, master ]
   pull_request:
     branches: [ develop, qa, master ]
+
+env:
+  FILE_NAME: Prod-Build-Artifact
   
 # A workflow can have one or more jobs which runs in parallel (default) or sequencially
 jobs:
@@ -45,12 +48,15 @@ jobs:
         delete: true
         quiet: false
 
-    - name: Upload Build Folder
+    - name: Upload Prod build Artifacts
       uses: actions/upload-artifact@v1.0.0
       with: 
-        name: build
-        path: build
+        name: Download-Prod-Build-Artifact
+        path: ./${{ env.FILE_NAME }}
+    - name: Download Prod build Artifacts
     - uses: actions/download-artifact@v1.0.0
+      with: 
+        name: Download-Prod-Build-Artifact
 
     - name: Sync aws s3 qa bucket from git
       if: github.event_name == 'push' && github.ref == 'refs/heads/qa'
