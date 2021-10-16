@@ -54,7 +54,7 @@ jobs:
         name: Download-Prod-Build-Artifact
         path: ./${{ env.FILE_NAME }}
     - name: Download Prod build Artifacts
-    - uses: actions/download-artifact@v1.0.0
+      uses: actions/download-artifact@v1.0.0
       with: 
         name: Download-Prod-Build-Artifact
 
