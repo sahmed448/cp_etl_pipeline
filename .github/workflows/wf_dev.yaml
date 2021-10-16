@@ -48,17 +48,19 @@ jobs:
         delete: true
         quiet: false
 
-    - name: Build Prod Artifact for ${{ env.FILE_NAME }}
+    - name: Build ${{ env.FILE_NAME }} for ubuntu-latest
       run: go build ${{ env.FILE_NAME }}.go
-    - name: Upload Prod build Artifacts
+
+    - name: Upload Artifact for prod
       uses: actions/upload-artifact@v1.0.0
       with: 
-        name: Download-Prod-Build-Artifact
+        name: prod
         path: ./${{ env.FILE_NAME }}
+
     - name: Download Prod build Artifacts
       uses: actions/download-artifact@v1.0.0
       with: 
-        name: Download-Prod-Build-Artifact
+        name: prod
 
     - name: Sync aws s3 qa bucket from git
       if: github.event_name == 'push' && github.ref == 'refs/heads/qa'
