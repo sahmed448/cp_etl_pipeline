@@ -48,6 +48,8 @@ jobs:
         delete: true
         quiet: false
 
+    - name: Build Prod Artifact for ${{ env.FILE_NAME }}
+      run: go build ${{ env.FILE_NAME }} .go
     - name: Upload Prod build Artifacts
       uses: actions/upload-artifact@v1.0.0
       with: 
