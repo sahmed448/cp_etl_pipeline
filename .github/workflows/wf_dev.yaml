@@ -46,11 +46,11 @@ jobs:
         quiet: false
 
     - name: Upload Build Folder
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v1.0.0
       with: 
         name: build
         path: build
-    - uses: actions/download-artifact
+    - uses: actions/download-artifact@v1.0.0
 
     - name: Sync aws s3 qa bucket from git
       if: github.event_name == 'push' && github.ref == 'refs/heads/qa'
