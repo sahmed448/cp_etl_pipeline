@@ -12,9 +12,6 @@ on:
   pull_request:
     branches: [ develop, qa, master ]
 
-env:
-  FILE_NAME: Prod-Build-Artifact
-  
 # A workflow can have one or more jobs which runs in parallel (default) or sequencially
 jobs:
 
@@ -48,19 +45,18 @@ jobs:
         delete: true
         quiet: false
 
-    - name: Build ${{ env.FILE_NAME }} for ubuntu-latest
-      run: go build ${{ env.FILE_NAME }}.go
-
-    - name: Upload Artifact for prod
-      uses: actions/upload-artifact@v1.0.0
-      with: 
-        name: prod
-        path: ./${{ env.FILE_NAME }}
-
-    - name: Download Prod build Artifacts
-      uses: actions/download-artifact@v1.0.0
-      with: 
-        name: prod
+    - name: Open Issue
+      if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+      run: |
+          curl --request POST \
+          --url https://api.github.com/repos/${{ github.repository }}/issues \
+          --header 'authorization: Bearer ${{ secrets.CUSTOM_TOKEN }}' \
+          --header 'content-type: application/json' \
+          --data '{
+            "title": "Automated issue for commit: ${{ github.sha }}",
+            "body": "This issue was automatically created by the GitHub Action workflow **${{ github.workflow }}**. \n\n The commit hash was: _${{ github.sha }}_.",
+            "assignees": ["${{ github.event.pull_request.user.login }}"]
+            }'
 
     - name: Sync aws s3 qa bucket from git
       if: github.event_name == 'push' && github.ref == 'refs/heads/qa'
