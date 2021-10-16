@@ -45,6 +45,13 @@ jobs:
         delete: true
         quiet: false
 
+    - name: Upload Build Folder
+      uses: actions/upload-artifact@v1
+      with: 
+        name: build
+        path: build
+    - uses: actions/download-artifact
+
     - name: Sync aws s3 qa bucket from git
       if: github.event_name == 'push' && github.ref == 'refs/heads/qa'
       uses: sai-sharan/aws-s3-sync-action@v0.1.0
@@ -74,3 +81,4 @@ jobs:
         exclude: '.git/*'
         delete: true
         quiet: false
+
