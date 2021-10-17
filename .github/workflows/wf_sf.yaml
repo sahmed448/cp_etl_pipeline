@@ -4,8 +4,8 @@ name: snowflake-devops-demo.
 on:
   push:
     branches: [ develop, qa, master ]
-    paths:
-      - './snowflake_objects/**'
+    #paths:
+      #- './snowflake_objects/**'
 
 jobs:
   deploy-snowflake-changes-job:
