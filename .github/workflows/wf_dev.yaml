@@ -24,23 +24,6 @@ jobs:
       - name: gitleaks-action
         uses: zricethezav/gitleaks-action@master
 
-  deploy-Snowflake-changes:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup Python 3.8.x
-        uses: actions/setup-python@v2.2.1
-        with:
-          python-version: 3.8.x
- 
-      — name: Repo checkout
-        uses: actions/checkout@v2
-
-      - name: run schemachange!
-        run: |
-           pip install schemachange
-           schemachange -f ${GITHUB_WORKSPACE}/snowflake_objects -a     $SNOWFLAKE_ACCOUNT -u $SNOWFLAKE_USER -r $SNOWFLAKE_ROLE -w $SNOWFLAKE_WH -c $SNOWFLAKE_DB.METADATA.CHANGE_HISTORY — var $SCHEMACHANGE_VAR
-           
-
   build:
     needs: gitleaks
     runs-on: ubuntu-latest
