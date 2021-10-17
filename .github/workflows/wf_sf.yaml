@@ -4,8 +4,6 @@ name: snowflake-devops-demo
 on:
   push:
     branches: [ develop, qa, master ]
-    #paths:
-      #- 'snowflake_objects/**'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -24,19 +22,30 @@ jobs:
         with:
           python-version: 3.8.x
 
+      - uses: dorny/paths-flter@v2
+        id: deploy-snowflake-changes-job
+        with:
+          filters: |
+            src:
+              - './snowflake_objects'
+        #run only if some files in /snowflake_objects folder are changed
+        if: steps.changes.outputs.src == 'tue'
       - name: Run schemachange
-        env:
-          SF_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-          SF_USERNAME: ${{ secrets.SNOWFLAKE_USER }}
-          SF_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
-          SF_WAREHOUSE: ${{ secrets.SNOWFLAKE_WH }}
-          SF_DATABASE: ${{ secrets.SNOWFLAKE_DB }}
-          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+          env:
+            SF_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+            SF_USERNAME: ${{ secrets.SNOWFLAKE_USER }}
+            SF_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+            SF_WAREHOUSE: ${{ secrets.SNOWFLAKE_WH }}
+            SF_DATABASE: ${{ secrets.SNOWFLAKE_DB }}
+            SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+
         run: |
-          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
-          python --version
-          echo "Step 1: Installing schemachange"
-          pip install schemachange
+            echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+            python --version
+            echo "Step 1: Installing schemachange"
+            pip install schemachange
           
-          echo "Step 2: Running schemachange"
-          schemachange -f $GITHUB_WORKSPACE/snowflake_objects -a $SF_ACCOUNT -u $SF_USERNAME -r $SF_ROLE -w $SF_WAREHOUSE -d $SF_DATABASE -c $SF_DATABASE.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
+            echo "Step 2: Running schemachange"
+            schemachange -f $GITHUB_WORKSPACE/snowflake_objects -a $SF_ACCOUNT -u $SF_USERNAME -r $SF_ROLE -w $SF_WAREHOUSE -d $SF_DATABASE -c $SF_DATABASE.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
+    
+    
