@@ -1,0 +1,96 @@
+# This workflow will trigger on both pull_request & push event's. But the Actions will only be performed on push to develop, qa & master branches.
+# The build job & steps will syn S3 dev/qa/prod buckets.....
+name: build-and-deploy to S3.
+
+
+# Define the event/event's which will trigger the workflow.
+# This workflow will trigger on both pull_request & push event's.
+# Once the changes are reviewed/approved/merged the job will run.
+on:
+  push:
+    branches: [ develop, qa, master ]
+    paths:
+      - 'sql/'
+  pull_request:
+    branches: [ develop, qa, master ]
+    paths:
+      - 'sql/'
+
+# A workflow can have one or more jobs which runs in parallel (default) or sequencially
+jobs:
+
+  gitleaks: # This job will scan for any leaks in credentials.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: '2'
+      - name: gitleaks-action
+        uses: zricethezav/gitleaks-action@master
+
+  build:
+    needs: gitleaks
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+
+    - name: Sync aws s3 dev bucket from git
+      if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+      uses: sai-sharan/aws-s3-sync-action@v0.1.0
+
+      with:
+        access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY  }}
+        region: 'us-west-2'
+        #source: 'build'
+        destination_bucket: ${{ secrets.AWS_S3_DEV_BUCKET }}
+        destination_prefix: 'sql'
+        exclude: '.git/*'
+        delete: true
+        quiet: false
+
+    - name: Sync aws s3 qa bucket from git
+      if: github.event_name == 'push' && github.ref == 'refs/heads/qa'
+      uses: sai-sharan/aws-s3-sync-action@v0.1.0
+
+      with:
+        access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY  }}
+        region: 'us-west-2'
+        #source: 'build'
+        destination_bucket: ${{ secrets.AWS_S3_QA_BUCKET }}
+        destination_prefix: 'sql'
+        exclude: '.git/*'
+        delete: true
+        quiet: false
+
+    - name: Sync aws s3 prod bucket from git
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+      uses: sai-sharan/aws-s3-sync-action@v0.1.0
+
+      with:
+        access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY  }}
+        region: 'us-west-2'
+        #source: 'build'
+        destination_bucket: ${{ secrets.AWS_S3_PROD_BUCKET }}
+        destination_prefix: 'sql'
+        exclude: '.git/*'
+        delete: true
+        quiet: false
+
+    - name: Open Issue For Prod Build & Deploy Failure
+      if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/develop'
+      run: |
+          curl --request POST \
+          --url https://api.github.com/repos/${{ github.repository }}/issues \
+          --header 'authorization: Bearer ${{ secrets.CUSTOM_TOKEN }}' \
+          --header 'content-type: application/json' \
+          --data '{
+            "title": "Automated issue for commit: ${{ github.sha }}",
+            "body": "This issue was automatically created by the GitHub Action workflow **${{ github.workflow }}**. \n\n The commit hash was: _${{ github.sha }}_.",
+            "assignees": ["${{ github.event.pull_request.user.login }}"]
+            }'
+
+
