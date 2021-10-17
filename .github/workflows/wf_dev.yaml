@@ -10,11 +10,11 @@ on:
   push:
     branches: [ develop, qa, master ]
     paths:
-      - 'sql/'
+      - 'sql/**'
   pull_request:
     branches: [ develop, qa, master ]
     paths:
-      - 'sql/'
+      - 'sql/**'
 
 # A workflow can have one or more jobs which runs in parallel (default) or sequencially
 jobs:

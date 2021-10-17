@@ -1,1 +1,1 @@
-select * from pos1;
+select * from table5;
