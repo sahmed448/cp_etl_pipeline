@@ -45,7 +45,7 @@ jobs:
         region: 'us-west-2'
         #source: 'build'
         destination_bucket: ${{ secrets.AWS_S3_DEV_BUCKET }}
-        destination_prefix: 'sql'
+        destination_prefix: 'sql/'
         exclude: '.git/*'
         delete: true
         quiet: false
@@ -60,7 +60,7 @@ jobs:
         region: 'us-west-2'
         #source: 'build'
         destination_bucket: ${{ secrets.AWS_S3_QA_BUCKET }}
-        destination_prefix: 'sql'
+        destination_prefix: 'sql/'
         exclude: '.git/*'
         delete: true
         quiet: false
@@ -75,7 +75,7 @@ jobs:
         region: 'us-west-2'
         #source: 'build'
         destination_bucket: ${{ secrets.AWS_S3_PROD_BUCKET }}
-        destination_prefix: 'sql'
+        destination_prefix: 'sql/'
         exclude: '.git/*'
         delete: true
         quiet: false
