@@ -8,9 +8,13 @@ name: build-and-deploy to S3
 # Once the changes are reviewed/approved/merged the job will run.
 on:
   push:
-    branches: [ develop1, qa1, master1 ]
+    branches: [ develop, qa, master ]
+    paths:
+      - 'sql/'
   pull_request:
-    branches: [ develop1, qa1, master1 ]
+    branches: [ develop, qa, master ]
+    paths:
+      - 'sql/'
 
 # A workflow can have one or more jobs which runs in parallel (default) or sequencially
 jobs:
@@ -41,7 +45,7 @@ jobs:
         region: 'us-west-2'
         #source: 'build'
         destination_bucket: ${{ secrets.AWS_S3_DEV_BUCKET }}
-        #destination_prefix: 'wmtc'
+        destination_prefix: 'sql'
         exclude: '.git/*'
         delete: true
         quiet: false
@@ -56,7 +60,7 @@ jobs:
         region: 'us-west-2'
         #source: 'build'
         destination_bucket: ${{ secrets.AWS_S3_QA_BUCKET }}
-        #destination_prefix: 'wmtc'
+        destination_prefix: 'sql'
         exclude: '.git/*'
         delete: true
         quiet: false
@@ -71,7 +75,7 @@ jobs:
         region: 'us-west-2'
         #source: 'build'
         destination_bucket: ${{ secrets.AWS_S3_PROD_BUCKET }}
-        #destination_prefix: 'wmtc'
+        destination_prefix: 'sql'
         exclude: '.git/*'
         delete: true
         quiet: false
