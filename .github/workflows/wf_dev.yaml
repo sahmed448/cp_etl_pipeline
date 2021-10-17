@@ -8,9 +8,9 @@ name: build-and-deploy to S3
 # Once the changes are reviewed/approved/merged the job will run.
 on:
   push:
-    branches: [ develop, qa, master ]
+    branches: [ develop1, qa1, master1 ]
   pull_request:
-    branches: [ develop, qa, master ]
+    branches: [ develop1, qa1, master1 ]
 
 # A workflow can have one or more jobs which runs in parallel (default) or sequencially
 jobs:
@@ -23,6 +23,24 @@ jobs:
           fetch-depth: '2'
       - name: gitleaks-action
         uses: zricethezav/gitleaks-action@master
+
+  deploy-Snowflake-changes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Python 3.8.x
+        uses: actions/setup-python@v2.2.1
+        with:
+          python-version: 3.8.x
+ 
+      — name: Repo checkout
+        uses: actions/checkout@v2
+
+      - name: run schemachange!
+        run: |
+           pip install schemachange
+           schemachange -f ${GITHUB_WORKSPACE}/snowflake_objects -a     $SNOWFLAKE_ACCOUNT -u $SNOWFLAKE_USER -r $SNOWFLAKE_ROLE -w $SNOWFLAKE_WH -c $SNOWFLAKE_DB.METADATA.CHANGE_HISTORY — var $SCHEMACHANGE_VAR
+           
+
   build:
     needs: gitleaks
     runs-on: ubuntu-latest
@@ -44,20 +62,6 @@ jobs:
         exclude: '.git/*'
         delete: true
         quiet: false
-
-    - name: Open Issue
-      #if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/develop'
-      if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-      run: |
-          curl --request POST \
-          --url https://api.github.com/repos/${{ github.repository }}/issues \
-          --header 'authorization: Bearer ${{ secrets.CUSTOM_TOKEN }}' \
-          --header 'content-type: application/json' \
-          --data '{
-            "title": "Automated issue for commit: ${{ github.sha }}",
-            "body": "This issue was automatically created by the GitHub Action workflow **${{ github.workflow }}**. \n\n The commit hash was: _${{ github.sha }}_.",
-            "assignees": ["${{ github.event.pull_request.user.login }}"]
-            }'
 
     - name: Sync aws s3 qa bucket from git
       if: github.event_name == 'push' && github.ref == 'refs/heads/qa'
@@ -88,4 +92,18 @@ jobs:
         exclude: '.git/*'
         delete: true
         quiet: false
+
+    - name: Open Issue For Prod Build & Deploy Failure
+      if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/develop'
+      run: |
+          curl --request POST \
+          --url https://api.github.com/repos/${{ github.repository }}/issues \
+          --header 'authorization: Bearer ${{ secrets.CUSTOM_TOKEN }}' \
+          --header 'content-type: application/json' \
+          --data '{
+            "title": "Automated issue for commit: ${{ github.sha }}",
+            "body": "This issue was automatically created by the GitHub Action workflow **${{ github.workflow }}**. \n\n The commit hash was: _${{ github.sha }}_.",
+            "assignees": ["${{ github.event.pull_request.user.login }}"]
+            }'
+
 
