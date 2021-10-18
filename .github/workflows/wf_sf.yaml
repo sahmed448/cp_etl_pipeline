@@ -16,6 +16,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: deploy Snowflake ddls from git to dev env.  
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
       - name: Use Python 3.8.x
         uses: actions/setup-python@v2.2.1
         with:
@@ -29,11 +31,36 @@ jobs:
           SF_WAREHOUSE: ${{ secrets.SNOWFLAKE_WH }}
           SF_DATABASE: ${{ secrets.SNOWFLAKE_DB }}
           SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
-        run: |
-          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
-          python --version
-          echo "Step 1: Installing schemachange"
-          pip install schemachange
+          run: |
+            echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+            python --version
+            echo "Step 1: Installing schemachange"
+            pip install schemachange
           
-          echo "Step 2: Running schemachange"
-          schemachange -f $GITHUB_WORKSPACE/snowflake_objects -a $SF_ACCOUNT -u $SF_USERNAME -r $SF_ROLE -w $SF_WAREHOUSE -d $SF_DATABASE -c $SF_DATABASE.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
+            echo "Step 2: Running schemachange"
+            schemachange -f $GITHUB_WORKSPACE/snowflake_objects -a $SF_ACCOUNT -u $SF_USERNAME -r $SF_ROLE -w $SF_WAREHOUSE -d $SF_DATABASE -c $SF_DATABASE.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
+
+      
+      - name: deploy Snowflake ddls from git to qa env.  
+        if: github.event_name == 'push' && github.ref == 'refs/heads/qa'
+      - name: Use Python 3.8.x
+        uses: actions/setup-python@v2.2.1
+        with:
+          python-version: 3.8.x
+
+      - name: Run schemachange
+        env:
+          QA_SF_ACCOUNT: ${{ secrets.QA_SNOWFLAKE_ACCOUNT }}
+          QA_SF_USERNAME: ${{ secrets.QA_SNOWFLAKE_USER }}
+          QA_SF_ROLE: ${{ secrets.QA_SNOWFLAKE_ROLE }}
+          QA_SF_WAREHOUSE: ${{ secrets.QA_SNOWFLAKE_WH }}
+          QA_SF_DATABASE: ${{ secrets.QA_SNOWFLAKE_DB }}
+          QA_SNOWFLAKE_PASSWORD: ${{ secrets.QA_SNOWFLAKE_PASSWORD }}
+          run: |
+            echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+            python --version
+            echo "Step 1: Installing schemachange"
+            pip install schemachange
+          
+            echo "Step 2: Running schemachange"
+            schemachange -f $GITHUB_WORKSPACE/snowflake_objects -a $QA_SF_ACCOUNT -u $QA_SF_USERNAME -r $QA_SF_ROLE -w $QA_SF_WAREHOUSE -d $QA_SF_DATABASE -c $QA_SF_DATABASE.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
