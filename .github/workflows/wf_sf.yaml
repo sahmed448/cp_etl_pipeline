@@ -18,7 +18,7 @@ jobs:
 
       - name: deploy Snowflake ddls from git to dev env.  
         if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-      - name: Use Python 3.8.x
+      #- name: Use Python 3.8.x
         uses: actions/setup-python@v2.2.1
         with:
           python-version: 3.8.x
@@ -43,7 +43,7 @@ jobs:
       
       - name: deploy Snowflake ddls from git to qa env.  
         if: github.event_name == 'push' && github.ref == 'refs/heads/qa'
-      - name: Use Python 3.8.x
+      #- name: Use Python 3.8.x
         uses: actions/setup-python@v2.2.1
         with:
           python-version: 3.8.x
