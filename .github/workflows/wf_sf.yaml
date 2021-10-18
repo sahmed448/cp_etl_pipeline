@@ -16,14 +16,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: deploy Snowflake ddls from git to dev env.  
-        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-      #- name: Use Python 3.8.x
+      - name: deploy Snowflake ddls from git to dev env.
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'    
         uses: actions/setup-python@v2.2.1
         with:
           python-version: 3.8.x
 
-      - name: Run schemachange
+      - name: Run schemachange   
         env:
           SF_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
           SF_USERNAME: ${{ secrets.SNOWFLAKE_USER }}
@@ -40,15 +39,13 @@ jobs:
             echo "Step 2: Running schemachange"
             schemachange -f $GITHUB_WORKSPACE/snowflake_objects -a $SF_ACCOUNT -u $SF_USERNAME -r $SF_ROLE -w $SF_WAREHOUSE -d $SF_DATABASE -c $SF_DATABASE.SCHEMACHANGE.CHANGE_HISTORY --create-change-history-table
 
-      
       - name: deploy Snowflake ddls from git to qa env.  
         if: github.event_name == 'push' && github.ref == 'refs/heads/qa'
-      #- name: Use Python 3.8.x
         uses: actions/setup-python@v2.2.1
         with:
           python-version: 3.8.x
 
-      - name: Run schemachange
+      - name: Run schemachange   
         env:
           QA_SF_ACCOUNT: ${{ secrets.QA_SNOWFLAKE_ACCOUNT }}
           QA_SF_USERNAME: ${{ secrets.QA_SNOWFLAKE_USER }}
