@@ -1,4 +1,4 @@
-name: Deploy Snowflake DDL Changes
+name: Deploy Snowflake DDL Changes.
 
 # Controls when the action will run. 
 on:

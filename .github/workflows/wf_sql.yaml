@@ -1,6 +1,6 @@
 # This workflow will trigger on both pull_request & push event's. But the Actions will only be performed on push to develop, qa & master branches.
 # The build job & steps will syn S3 dev/qa/prod sql folders.....
-name: build-and-deploy to S3.
+name: build-and-deploy to S3
 
 
 # Define the event/event's which will trigger the workflow.
